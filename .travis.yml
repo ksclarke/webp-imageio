@@ -1,0 +1,74 @@
+language: bash
+
+sudo: false
+
+# FIXME: We can't enable PR-triggered travis builds with this turned on
+# https://travis-ci.community/t/windows-instances-hanging-before-install/250/24
+filter_secrets: false
+
+env:
+  global:
+    - NDK_VERSION="r13b"
+# Update *.mk(s) before upgrading
+#    - NDK_VERSION="r19b"
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      jdk: oraclejdk11
+      # We'll do the Android build along with the Linux one
+      env:
+        - MAVEN_PROFILE="-Pandroid"
+        - ANDROID_HOME="/usr/lib/android-sdk"
+        - ANDROID_NDK_HOME="/tmp/android-ndk-${NDK_VERSION}"
+        - PATH=$PATH:$ANDROID_NDK_HOME
+      addons:
+        apt:
+          update: true
+          packages:
+            - gcc-multilib
+            - maven
+            - android-sdk
+            - awscli
+    - os: osx
+      osx_image: xcode10.1
+      addons:
+        homebrew:
+          packages:
+            - cmake
+            - gcc
+            - maven
+            - awscli 
+    - os: windows
+      env:
+        - JAVA_HOME="/c/jdk11"
+        - PATH="$PATH:$JAVA_HOME/bin:/c/Program Files/Amazon/AWSCLI"
+
+install:
+- >
+  if [ $TRAVIS_OS_NAME = windows ] ; then
+    choco install maven make awscli ;
+    choco install jdk11 -params 'installdir=c:\\jdk11' ;
+  fi
+- >
+  if [ $TRAVIS_OS_NAME = linux ] ; then
+    wget -q https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-x86_64.zip ;
+    unzip -qq -d /tmp android-ndk-${NDK_VERSION}-linux-x86_64.zip ;
+  fi
+
+script:
+- mvn clean package $MAVEN_PROFILE
+
+after_success:
+- .travis/deploy.sh
+
+# Just to confirm process works:
+#   https://oss.sonatype.org/content/repositories/snapshots/info/freelibrary/webp-imageio/
+
+notifications:
+  email:
+    recipients:
+      - ksclarke@ksclarke.io
+    on_success: change
+    on_failure: change

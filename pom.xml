@@ -6,6 +6,7 @@
   <version>1.0.0-SNAPSHOT</version>
   <name>webp-imageio</name>
   <description>An imageio wrapper for the native webp library</description>
+  <!-- Ignore, from POM template -->
   <url>http://projects.freelibrary.info/webp-imageio</url>
 
   <licenses>
@@ -15,17 +16,20 @@
     </license>
   </licenses>
 
+  <!-- Ignore, from POM template -->
   <scm>
     <connection>scm:git:git@github.com:ksclarke/webp-imageio.git</connection>
     <developerConnection>scm:git:git@github.com:ksclarke/webp-imageio.git</developerConnection>
     <url>git@github.com:ksclarke/webp-imageio.git</url>
   </scm>
 
+  <!-- Ignore, from POM template -->
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/ksclarke/webp-imageio/issues</url>
   </issueManagement>
 
+  <!-- Ignore, from POM template -->
   <developers>
     <developer>
       <email>ksclarke@ksclarke.io</email>
@@ -42,11 +46,14 @@
     <cmake.maven.plugin>3.7.2-b1</cmake.maven.plugin>
     <freelib.utils.version>0.8.9</freelib.utils.version>
     <codacy.plugin.version>1.0.2</codacy.plugin.version>
-    <maven.download.plugin.version>1.3.0</maven.download.plugin.version>
+
+    <!-- Ignore checkstyle rules from POM template -->
+    <checkstyle.skip>true</checkstyle.skip>
   </properties>
 
   <dependencies>
     <!-- Below dependencies are only used for testing -->
+    <!-- Ignore first, from POM template -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -122,29 +129,11 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>com.googlecode.maven-download-plugin</groupId>
-        <artifactId>download-maven-plugin</artifactId>
-        <version>${maven.download.plugin.version}</version>
-        <executions>
-          <execution>
-            <id>install-test-images</id>
-            <phase>generate-test-resources</phase>
-            <goals>
-              <goal>wget</goal>
-            </goals>
-            <!-- Download some test images too large to store in GitHub -->
-            <configuration>
-              <url>https://s3.amazonaws.com/ksclarke-data/jiiify-image-test-images.zip</url>
-              <unpack>true</unpack>
-              <outputDirectory>${project.basedir}/src/test/resources/images</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+      <!-- Ignore, from POM template -->
       <plugin>
         <artifactId>maven-pmd-plugin</artifactId>
       </plugin>
+      <!-- Ignore, from POM template -->
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <dependencies>
@@ -180,17 +169,20 @@
           </execution>
         </executions>
       </plugin>
+      <!-- Ignore, from POM template -->
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
       </plugin>
+      <!-- Ignore, from POM template -->
       <plugin>
         <groupId>com.gavinmogan</groupId>
         <artifactId>codacy-maven-plugin</artifactId>
         <version>${codacy.plugin.version}</version>
       </plugin>
+      <!-- Ignore, from POM template -->
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
       </plugin>
@@ -201,10 +193,12 @@
           <argLine>-Djava.library.path=${project.build.directory}/build/src/main/c ${jacoco.agent.arg}</argLine>
         </configuration>
       </plugin>
+      <!-- Ignore, from POM template -->
       <plugin>
         <groupId>br.com.ingenieux</groupId>
         <artifactId>jbake-maven-plugin</artifactId>
       </plugin>
+      <!-- Ignore, from POM template -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -214,6 +208,7 @@
         <version>${jar.plugin.version}</version>
         <executions>
           <execution>
+            <id>native-jar</id>
             <phase>package</phase>
             <goals>
               <goal>jar</goal>
@@ -224,6 +219,9 @@
               <includes>
                 <include>${library.extension}</include>
               </includes>
+              <archive>
+                <addMavenDescriptor>false</addMavenDescriptor>
+              </archive>
             </configuration>
           </execution>
         </executions>
@@ -233,7 +231,152 @@
 
   <profiles>
     <profile>
-      <id>linux64</id>
+      <id>deploy</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>android-jar</id>
+                <phase/>
+              </execution>
+              <execution>
+                <id>native-jar</id>
+                <phase/>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.googlecode.cmake-maven-project</groupId>
+            <artifactId>cmake-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>cmake-generate</id>
+                <phase/>
+              </execution>
+              <execution>
+                <id>cmake-compile</id>
+                <phase/>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-artifact</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>attach-artifact</goal>
+                </goals>
+                <configuration>
+                  <artifacts>
+                    <artifact>
+                      <file>${project.build.directory}/webp-imageio-${project.version}-android.jar</file>
+                      <type>jar</type>
+                      <classifier>android</classifier>
+                    </artifact>
+                    <artifact>
+                      <file>${project.build.directory}/webp-imageio-${project.version}-linux.jar</file>
+                      <type>jar</type>
+                      <classifier>linux</classifier>
+                    </artifact>
+                    <artifact>
+                      <file>${project.build.directory}/webp-imageio-${project.version}-mac.jar</file>
+                      <type>jar</type>
+                      <classifier>mac</classifier>
+                    </artifact>
+                    <artifact>
+                      <file>${project.build.directory}/webp-imageio-${project.version}-windows.jar</file>
+                      <type>jar</type>
+                      <classifier>windows</classifier>
+                    </artifact>
+                  </artifacts>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>android</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-versions</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireEnvironmentVariable>
+                      <variableName>ANDROID_NDK_HOME</variableName>
+                    </requireEnvironmentVariable>
+                    <requireEnvironmentVariable>
+                      <variableName>ANDROID_HOME</variableName>
+                    </requireEnvironmentVariable>
+                  </rules>
+                  <fail>true</fail>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <executable>ndk-build</executable>
+              <workingDirectory>${project.basedir}/src/android</workingDirectory>
+              <arguments>
+                <argument>NDK_LIBS_OUT=${project.build.directory}/android-build/libs</argument>
+                <argument>NDK_OUT=${project.build.directory}/android-build/obj</argument>
+              </arguments>
+            </configuration>
+          </plugin>
+          <!-- If we override the jar plugin we have to do twice the work -->
+          <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>${jar.plugin.version}</version>
+            <executions>
+              <execution>
+                <id>android-jar</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <classesDirectory>${project.build.directory}/android-build/</classesDirectory>
+                  <classifier>android</classifier>
+                  <includes>
+                    <include>libs/**/*.so</include>
+                  </includes>
+                  <archive>
+                    <addMavenDescriptor>false</addMavenDescriptor>
+                  </archive>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>linux-x86_64</id>
       <activation>
         <os>
           <name>Linux</name>
@@ -243,28 +386,12 @@
       <properties>
         <cmake.generator>Unix Makefiles</cmake.generator>
         <cmake.classifier>linux-x86_64</cmake.classifier>
-        <jar.classifier>linux64</jar.classifier>
+        <jar.classifier>linux</jar.classifier>
         <library.extension>*.so</library.extension>
       </properties>
     </profile>
     <profile>
-      <id>linux32</id>
-      <activation>
-        <os>
-          <name>Linux</name>
-          <arch>i386</arch>
-        </os>
-      </activation>
-      <properties>
-        <cmake.generator>Unix Makefiles</cmake.generator>
-        <!--  linux-arm_32 -->
-        <cmake.classifier>linux-x86_32</cmake.classifier>
-        <jar.classifier>linux32</jar.classifier>
-        <library.extension>*.so</library.extension>
-      </properties>
-    </profile>
-    <profile>
-      <id>mac64</id>
+      <id>mac-x86_64</id>
       <activation>
         <os>
           <name>Mac OS X</name>
@@ -273,10 +400,13 @@
       </activation>
       <properties>
         <cmake.generator>Unix Makefiles</cmake.generator>
+        <cmake.classifier>mac-x86_64</cmake.classifier>
+        <jar.classifier>mac</jar.classifier>
+        <library.extension>*.dylib</library.extension>
       </properties>
     </profile>
     <profile>
-      <id>windows</id>
+      <id>windows-x86_64</id>
       <activation>
         <os>
           <family>windows</family>
@@ -284,9 +414,14 @@
       </activation>
       <properties>
         <cmake.generator>Unix Makefiles</cmake.generator>
+        <cmake.classifier>windows-x86_64</cmake.classifier>
+        <jar.classifier>windows</jar.classifier>
+        <library.extension>*.dll</library.extension>
       </properties>
     </profile>
   </profiles>
+
+  <!-- Ignore everything below here, from POM template -->
 
   <!-- Enables pushing project documentation up to an S3 bucket -->
   <distributionManagement>
