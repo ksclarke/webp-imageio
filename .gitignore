@@ -1,5 +1,3 @@
-build/
-
 # Temporary ignores
 src/main/tools/
 src/test/resources/images/
